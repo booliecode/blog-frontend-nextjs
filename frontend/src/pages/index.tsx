@@ -15,35 +15,28 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <h1 className="text-3xl font-bold underline">
+        <h1 className="text-3xl underline">
           Willkommen bei Munchkin PlayerTable
         </h1>
-        <table className="table-auto drop-shadow">
-          <thead>
-            <tr>
-              <th>Song</th>
-              <th>Artist</th>
-              <th>Year</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>The Sliding Mr. Bones (Next Stop, Pottersville)</td>
-              <td>Malcolm Lockyer</td>
-              <td>1961</td>
-            </tr>
-            <tr>
-              <td>Witchy Woman</td>
-              <td>The Eagles</td>
-              <td>1972</td>
-            </tr>
-            <tr>
-              <td>Shining Star</td>
-              <td>Earth, Wind, and Fire</td>
-              <td>1975</td>
-            </tr>
-          </tbody>
-        </table>
+        <div>
+          <h2 className='text-2xl font-bold'>aktuelle Spieler</h2>
+          <table className="table-fixed border-collapse border border-slate-400">
+            <thead>
+              <tr>
+                <th className='border border-slate-300'>Name</th>
+                <th className='border border-slate-300'>Level</th>
+                <th className='border border-slate-300'>Attack</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className='border border-slate-300'>Marc</td>
+                <td className='border border-slate-300'>1</td>
+                <td className='border border-slate-300'>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </main>
     </>
   )
