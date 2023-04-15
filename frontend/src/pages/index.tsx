@@ -1,11 +1,28 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from 'next/head';
+import styles from '@/styles/Home.module.css';
 
-const inter = Inter({ subsets: ['latin'] })
+import React, { useState } from 'react';
 
-export default function Home() {
+export default function Home(players: Array<any>) {
+
+  function increaseLevel(playerId: number, level:number) : void {
+    setStaticProps(playerId,level+1);
+    players.players.map((player) => {
+      if(player.id == playerId) {
+        player.attributes.level = level+1;
+      }
+    });
+  }
+
+  function decreaseLevel(playerId: number, level:number) : void {
+    setStaticProps(playerId,level-1);
+    players.players.map((player) => {
+      if(player.id == playerId) {
+        player.attributes.level = level-1;
+      }
+    });
+  }
+
   return (
     <>
       <Head>
@@ -24,20 +41,79 @@ export default function Home() {
             <thead>
               <tr>
                 <th className='border border-slate-300'>Name</th>
-                <th className='border border-slate-300'>Level</th>
-                <th className='border border-slate-300'>Attack</th>
+                <th className='border border-slate-300' colSpan={2}>Level</th>
+                <th className='border border-slate-300' colSpan={2}>Attack</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className='border border-slate-300'>Marc</td>
-                <td className='border border-slate-300'>1</td>
-                <td className='border border-slate-300'>1</td>
-              </tr>
+              {players.players.map((player) => (
+                <>
+                <tr key={player.id}>
+                  <td className='border border-slate-100 font-bold'>{player.attributes.name}</td>
+                  <td className='border border-slate-100 text-center' colSpan={2}>{player.attributes.level}</td>
+                  <td className='border border-slate-100 text-center' colSpan={2}>{player.attributes.attack}</td>
+                </tr>
+                <tr>
+                  <td className='border border-slate-100'>
+                    <button className="text-white bg-blue-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    reset Player
+                    </button>
+                  </td>
+                  <td className='border border-slate-100'>
+                    <button onClick={() => increaseLevel(player.id, player.attributes.level)} className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Level Up
+                    </button>
+                  </td>
+                  <td className='border border-slate-100'>
+                    <button onClick={() => decreaseLevel(player.id, player.attributes.level)} className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Level Down
+                    </button>
+                  </td>
+                  <td className='border border-slate-100'><button className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Attack Up
+                  </button></td>
+                  <td className='border border-slate-100'><button className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Attack Down
+                  </button></td>
+                </tr>
+                <tr>
+                  <td className='bg-color-black p-4 border border-slate-100' colSpan={5}></td>
+                </tr>
+                </>
+              ))}
             </tbody>
           </table>
         </div>
       </main>
     </>
   )
+}
+
+
+export async function getStaticProps() {
+  // get data from external API
+  const res = await fetch(`http://localhost:1337/api/players`);
+  const players = await res.json();
+  console.log(players.data);
+  return {
+    props: {
+      players : players.data,
+    },
+  }
+}
+
+export async function setStaticProps(player:number, level:number) {
+  const data = JSON.stringify({
+    data: {
+      "level": level,
+    }
+  });
+
+  const res = await fetch(`http://localhost:1337/api/players/${player}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: data,
+  })
 }
