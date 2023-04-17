@@ -1,27 +1,98 @@
 import Head from 'next/head';
 import styles from '@/styles/Home.module.css';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Home(players: Array<any>) {
+
+  const [player, setPlayer] = useState(players);
+  const [refreshToken, setRefreshToken] = useState(Math.random());
+
+  async function getStaticPropsLive() {
+    // get data from external API
+    const res = await fetch(`http://localhost:1337/api/players`);
+    const playersData = await res.json();
+    return playersData.data;
+  }
+
+  useEffect(() => {
+    getStaticPropsLive()
+      .then(playersData => {
+        let thePlayers = {players: playersData};
+        setPlayer(thePlayers);
+  })
+      .finally(() => {
+        // Update refreshToken after 3 seconds so this event will re-trigger and update the data
+        setTimeout(() => setRefreshToken(Math.random()), 3000);
+      });
+  }, [refreshToken])
 
   function increaseLevel(playerId: number, level:number) : void {
     setStaticProps(playerId,level+1);
     players.players.map((player) => {
       if(player.id == playerId) {
         player.attributes.level = level+1;
+        setPlayer(
+          players.players.map((playerElement) =>
+              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
+              playerElement.id === playerId
+                  ? { ...playerElement, attributes: {level: level+1} }
+                  : { ...playerElement }
+          )
+      );
       }
     });
   }
 
+  function decreaseAttack(playerId: number, attack:number) : void {
+    setStaticPropsAttack(playerId,attack-1);
+    players.players.map((player) => {
+      if(player.id == playerId) {
+        player.attributes.attack = attack-1;
+        setPlayer(
+          players.players.map((playerElement) =>
+              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
+              playerElement.id === playerId
+                  ? { ...playerElement, attributes: {attack: attack-1} }
+                  : { ...playerElement }
+          )
+      );
+      }
+    });
+  }
+  function increaseAttack(playerId: number, attack:number) : void {
+    setStaticPropsAttack(playerId,attack+1);
+    players.players.map((player) => {
+      if(player.id == playerId) {
+        player.attributes.attack = attack+1;
+        setPlayer(
+          players.players.map((playerElement) =>
+              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
+              playerElement.id === playerId
+                  ? { ...playerElement, attributes: {attack: attack+1} }
+                  : { ...playerElement }
+          )
+      );
+      }
+    });
+  }
   function decreaseLevel(playerId: number, level:number) : void {
     setStaticProps(playerId,level-1);
     players.players.map((player) => {
       if(player.id == playerId) {
         player.attributes.level = level-1;
+        setPlayer(
+          players.players.map((playerElement) =>
+              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
+              playerElement.id === playerId
+                  ? { ...playerElement, attributes: {level: level-1} }
+                  : { ...playerElement }
+          )
+      );
       }
     });
   }
+
 
   return (
     <>
@@ -46,7 +117,8 @@ export default function Home(players: Array<any>) {
               </tr>
             </thead>
             <tbody>
-              {players.players.map((player) => (
+              {console.log(players)}
+              {players.players? players.players.map((player) => (
                 <>
                 <tr key={player.id}>
                   <td className='border border-slate-100 font-bold'>{player.attributes.name}</td>
@@ -65,22 +137,32 @@ export default function Home(players: Array<any>) {
                     </button>
                   </td>
                   <td className='border border-slate-100'>
-                    <button onClick={() => decreaseLevel(player.id, player.attributes.level)} className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    Level Down
+                    <button 
+                      onClick={() => decreaseLevel(player.id, player.attributes.level)} 
+                      className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Level Down
                     </button>
                   </td>
-                  <td className='border border-slate-100'><button className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    Attack Up
-                  </button></td>
-                  <td className='border border-slate-100'><button className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    Attack Down
-                  </button></td>
+                  <td className='border border-slate-100'>
+                    <button 
+                      onClick={() => increaseAttack(player.id, player.attributes.attack)}
+                      className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Attack Up
+                    </button>
+                  </td>
+                  <td className='border border-slate-100'>
+                    <button 
+                      onClick={() => decreaseAttack(player.id, player.attributes.attack)}
+                      className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Attack Up
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td className='bg-color-black p-4 border border-slate-100' colSpan={5}></td>
                 </tr>
                 </>
-              ))}
+              )):null}
             </tbody>
           </table>
         </div>
@@ -106,6 +188,22 @@ export async function setStaticProps(player:number, level:number) {
   const data = JSON.stringify({
     data: {
       "level": level,
+    }
+  });
+
+  const res = await fetch(`http://localhost:1337/api/players/${player}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: data,
+  })
+}
+
+export async function setStaticPropsAttack(player:number, attack:number) {
+  const data = JSON.stringify({
+    data: {
+      "attack": attack,
     }
   });
 
