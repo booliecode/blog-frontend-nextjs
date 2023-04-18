@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import React, { useState, useEffect } from 'react';
-import { getStaticPropsLive, updatePlayerAPI } from '../api/player';
-import { Game } from '../types/game';
+import { getStaticPropsLive, updatePlayerAPI, createPlayerAPI, deletePlayerAPI } from '../api/player';
+import { Game, Attributes } from '../types/game';
 
 export async function getStaticProps() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/players`);
@@ -14,6 +14,33 @@ export async function getStaticProps() {
 export default function Home(game: Game) {
   const [player, setPlayer] = useState(game.players);
   const [refreshToken, setRefreshToken] = useState(Math.random());
+  const [playerName, setPlayerName] = useState('');
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setPlayerName(event.target.value);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const newPlayer:Attributes = {
+      name: playerName,
+      attack: 0,
+      level: 1
+    }
+    createPlayerAPI(newPlayer)
+      .then((data) => {
+        setPlayerName("");
+        setPlayer([...player, data]);
+      })
+  }
+
+  function deletePlayer(playerId: number) : void {
+    deletePlayerAPI(playerId)
+      .then(() => {
+        setPlayer(player.filter((playerObject) => playerObject.id !== playerId));
+      })
+  }
+
 
   useEffect(() => {
     getStaticPropsLive()
@@ -21,7 +48,7 @@ export default function Home(game: Game) {
         setPlayer(playersData);
       })
       .finally(() => {
-        setTimeout(() => setRefreshToken(Math.random()), 2000);
+        setTimeout(() => setRefreshToken(Math.random()), 3000);
       });
   }, [refreshToken])
 
@@ -95,7 +122,10 @@ export default function Home(game: Game) {
                   <td className='border border-slate-100 text-center' colSpan={2}>{playerObject.attributes.attack}</td>
                 </tr>
                 <tr>
-                  <td className='border border-slate-100'>
+                  <td className='border border-slate-100 h-full'>
+                    <button onClick={() => deletePlayer(playerObject.id)} className="text-white bg-gray-700 h-full hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Delete
+                    </button>
                   </td>
                   <td className='border border-slate-100'>
                     <button onClick={() => setLevel(playerObject.id, playerObject.attributes.level + 1)} className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -132,6 +162,15 @@ export default function Home(game: Game) {
             </tbody>
           </table>
           <h2 className='text-2xl font-bold'>Spieler erstellen</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="flex flex-col">
+              <label htmlFor="name" className="mb-2">Name</label>
+              <input type="text" name="name" id="name" className="border border-slate-400 p-2 mb-4" onChange={handleChange} value={playerName} />
+              <button type="submit" className="text-white bg-blue-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                Spieler erstellen
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </>
