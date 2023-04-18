@@ -1,27 +1,7 @@
 import Head from 'next/head';
-
-interface Attributes {
-  name: string;
-  attack: number;
-  level: number;
-}
-
-interface Player {
-  attributes: Attributes;
-  id: number;
-}
-interface Game {
-  players: Array<Player>;
-}
-
-
 import React, { useState, useEffect } from 'react';
-
-async function getStaticPropsLive() {
-  const res = await fetch(`http://localhost:1337/api/players`);
-  const playersData = await res.json();
-  return playersData.data;
-}
+import { getStaticPropsLive, updatePlayerAPI } from '../api/player';
+import { Game } from '../types/player';
 
 export default function Home(game: Game) {
   const [player, setPlayer] = useState(game.players);
@@ -148,32 +128,4 @@ export default function Home(game: Game) {
       </main>
     </>
   )
-}
-
-
-export async function getStaticProps() {
-  // get data from external API
-  const res = await fetch(`http://localhost:1337/api/players`);
-  const players = await res.json();
-  console.log(players.data);
-  return {
-    props: {players: players.data},
-  }
-}
-
-export async function updatePlayerAPI(player:number, attributes:Attributes) {
-  const data = JSON.stringify({
-    data: {
-      "level": attributes.level,
-      "attack": attributes.attack,
-    }
-  });
-
-  const res = await fetch(`http://localhost:1337/api/players/${player}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: data,
-  })
 }
