@@ -3,97 +3,53 @@ import styles from '@/styles/Home.module.css';
 
 import React, { useState, useEffect } from 'react';
 
-export default function Home(players: Array<any>) {
-
-  const [player, setPlayer] = useState(players);
+export default function Home(game: any) {
+  const [player, setPlayer] = useState(game.players);
   const [refreshToken, setRefreshToken] = useState(Math.random());
 
   async function getStaticPropsLive() {
     // get data from external API
     const res = await fetch(`http://localhost:1337/api/players`);
     const playersData = await res.json();
+    console.log(playersData.data);
     return playersData.data;
   }
 
   useEffect(() => {
     getStaticPropsLive()
       .then(playersData => {
-        let thePlayers = {players: playersData};
-        setPlayer(thePlayers);
-  })
+        setPlayer(playersData)
+      })
       .finally(() => {
         // Update refreshToken after 3 seconds so this event will re-trigger and update the data
-        setTimeout(() => setRefreshToken(Math.random()), 3000);
+        setTimeout(() => setRefreshToken(Math.random()), 2000);
       });
   }, [refreshToken])
 
   function increaseLevel(playerId: number, level:number) : void {
     setStaticProps(playerId,level+1);
-    players.players.map((player) => {
-      if(player.id == playerId) {
-        player.attributes.level = level+1;
-        setPlayer(
-          players.players.map((playerElement) =>
-              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
-              playerElement.id === playerId
-                  ? { ...playerElement, attributes: {level: level+1} }
-                  : { ...playerElement }
-          )
-      );
-      }
-    });
-  }
-
-  function decreaseAttack(playerId: number, attack:number) : void {
-    setStaticPropsAttack(playerId,attack-1);
-    players.players.map((player) => {
-      if(player.id == playerId) {
-        player.attributes.attack = attack-1;
-        setPlayer(
-          players.players.map((playerElement) =>
-              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
-              playerElement.id === playerId
-                  ? { ...playerElement, attributes: {attack: attack-1} }
-                  : { ...playerElement }
-          )
-      );
-      }
-    });
-  }
-  function increaseAttack(playerId: number, attack:number) : void {
-    setStaticPropsAttack(playerId,attack+1);
-    players.players.map((player) => {
-      if(player.id == playerId) {
-        player.attributes.attack = attack+1;
-        setPlayer(
-          players.players.map((playerElement) =>
-              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
-              playerElement.id === playerId
-                  ? { ...playerElement, attributes: {attack: attack+1} }
-                  : { ...playerElement }
-          )
-      );
-      }
-    });
+    let playerList = [...player];
+    playerList.find((player) => player.id === playerId).attributes.level = level+1;
+    setPlayer(playerList);
   }
   function decreaseLevel(playerId: number, level:number) : void {
     setStaticProps(playerId,level-1);
-    players.players.map((player) => {
-      if(player.id == playerId) {
-        player.attributes.level = level-1;
-        setPlayer(
-          players.players.map((playerElement) =>
-              // Here you accept a id argument to the function and replace it with hard coded 🤪 2, to make it dynamic.
-              playerElement.id === playerId
-                  ? { ...playerElement, attributes: {level: level-1} }
-                  : { ...playerElement }
-          )
-      );
-      }
-    });
+    let playerList = [...player];
+    playerList.find((player) => player.id === playerId).attributes.level = level-1;
+    setPlayer(playerList);
   }
-
-
+  function increaseAttack(playerId: number, attack:number) : void {
+    setStaticPropsAttack(playerId,attack+1);
+    let playerList = [...player];
+    playerList.find((player) => player.id === playerId).attributes.attack = attack+1;
+    setPlayer(playerList);
+  }
+  function decreaseAttack(playerId: number, attack:number) : void {
+    setStaticPropsAttack(playerId,attack-1);
+    let playerList = [...player];
+    playerList.find((player) => player.id === playerId).attributes.attack = attack-1;
+    setPlayer(playerList);
+  }
   return (
     <>
       <Head>
@@ -117,13 +73,12 @@ export default function Home(players: Array<any>) {
               </tr>
             </thead>
             <tbody>
-              {console.log(players)}
-              {players.players? players.players.map((player) => (
+              {player?player.map((playerObject) => (
                 <>
                 <tr key={player.id}>
-                  <td className='border border-slate-100 font-bold'>{player.attributes.name}</td>
-                  <td className='border border-slate-100 text-center' colSpan={2}>{player.attributes.level}</td>
-                  <td className='border border-slate-100 text-center' colSpan={2}>{player.attributes.attack}</td>
+                  <td className='border border-slate-100 font-bold'>{playerObject.attributes.name}</td>
+                  <td className='border border-slate-100 text-center' colSpan={2}>{playerObject.attributes.level}</td>
+                  <td className='border border-slate-100 text-center' colSpan={2}>{playerObject.attributes.attack}</td>
                 </tr>
                 <tr>
                   <td className='border border-slate-100'>
@@ -132,29 +87,29 @@ export default function Home(players: Array<any>) {
                     </button>
                   </td>
                   <td className='border border-slate-100'>
-                    <button onClick={() => increaseLevel(player.id, player.attributes.level)} className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <button onClick={() => increaseLevel(playerObject.id, playerObject.attributes.level)} className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                       Level Up
                     </button>
                   </td>
                   <td className='border border-slate-100'>
                     <button 
-                      onClick={() => decreaseLevel(player.id, player.attributes.level)} 
+                      onClick={() => decreaseLevel(playerObject.id, playerObject.attributes.level)} 
                       className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                       Level Down
                     </button>
                   </td>
                   <td className='border border-slate-100'>
                     <button 
-                      onClick={() => increaseAttack(player.id, player.attributes.attack)}
+                      onClick={() => increaseAttack(playerObject.id, playerObject.attributes.attack)}
                       className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                       Attack Up
                     </button>
                   </td>
                   <td className='border border-slate-100'>
                     <button 
-                      onClick={() => decreaseAttack(player.id, player.attributes.attack)}
+                      onClick={() => decreaseAttack(playerObject.id, playerObject.attributes.attack)}
                       className="text-white bg-red-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                      Attack Up
+                      Attack down
                     </button>
                   </td>
                 </tr>
@@ -178,9 +133,7 @@ export async function getStaticProps() {
   const players = await res.json();
   console.log(players.data);
   return {
-    props: {
-      players : players.data,
-    },
+    props: {players: players.data},
   }
 }
 
