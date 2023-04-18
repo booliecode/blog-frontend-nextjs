@@ -17,15 +17,15 @@ interface Game {
 
 import React, { useState, useEffect } from 'react';
 
+async function getStaticPropsLive() {
+  const res = await fetch(`http://localhost:1337/api/players`);
+  const playersData = await res.json();
+  return playersData.data;
+}
+
 export default function Home(game: Game) {
   const [player, setPlayer] = useState(game.players);
   const [refreshToken, setRefreshToken] = useState(Math.random());
-
-  async function getStaticPropsLive() {
-    const res = await fetch(`http://localhost:1337/api/players`);
-    const playersData = await res.json();
-    return playersData.data;
-  }
 
   useEffect(() => {
     getStaticPropsLive()
@@ -108,9 +108,6 @@ export default function Home(game: Game) {
                 </tr>
                 <tr>
                   <td className='border border-slate-100'>
-                    <button className="text-white bg-blue-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    reset Player
-                    </button>
                   </td>
                   <td className='border border-slate-100'>
                     <button onClick={() => setLevel(playerObject.id, playerObject.attributes.level + 1)} className="text-white bg-green-700 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
