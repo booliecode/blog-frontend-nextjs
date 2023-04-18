@@ -1,7 +1,15 @@
 import Head from 'next/head';
 import React, { useState, useEffect } from 'react';
 import { getStaticPropsLive, updatePlayerAPI } from '../api/player';
-import { Game } from '../types/player';
+import { Game } from '../types/game';
+
+export async function getStaticProps() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/players`);
+  const players = await res.json();
+  return {
+    props: {players: players.data},
+  }
+}
 
 export default function Home(game: Game) {
   const [player, setPlayer] = useState(game.players);
@@ -10,7 +18,7 @@ export default function Home(game: Game) {
   useEffect(() => {
     getStaticPropsLive()
       .then(playersData => {
-        setPlayer(playersData)
+        setPlayer(playersData);
       })
       .finally(() => {
         setTimeout(() => setRefreshToken(Math.random()), 2000);
