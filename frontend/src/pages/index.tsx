@@ -5,6 +5,7 @@ import { Game, Attributes } from '../types/game';
 
 export async function getStaticProps() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/players`);
+  console.log(res);
   const players = await res.json();
   return {
     props: {players: players.data},
